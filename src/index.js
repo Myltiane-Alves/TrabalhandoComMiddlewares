@@ -12,10 +12,10 @@ const users = [];
 function checksExistsUserAccount(request, response, next) {
   const { username } = request.headers;
 
-  const userExists = users.some((user) => user.name === username);
+  const userExists = users.some((user) => user.username === username);
 
   if(!userExists) {
-    return response.status(400).json({erro: 'User does not exist'});
+    return response.status(404).json({erro: 'User does not exist'});
   }
 
   request.user = users.filter((user) => user.username === username)[0];
@@ -26,11 +26,11 @@ function checksCreateTodosUserAvailability(request, response, next) {
   const { user } = request;
 
   if((!user.pro && user.todos.length < 10) || user.pro) {
-    return next()
+    return next();
   }
 
-  if(!user.pro && user.todos.lenght === 10) {
-    return response.status(400).json({ error: 'ocorreu um erro'});
+  if(!user.pro && user.todos.length === 10) {
+    return response.status(403).json({ error: 'ocorreu um erro'});
   }
 }
 
@@ -38,7 +38,7 @@ function checksTodoExists(request, response, next) {
   const { username } = request.headers;
   const { id } = request.params;
 
-  const user = filter((todos) => todo.id === id)[0];
+  const user = users.filter((user) => user.username === username)[0];
   const todo = user?.todos.filter((todo) => todo.id === id)[0];
 
   const userExists = users.some((user) => user.username === username);
@@ -56,10 +56,10 @@ function checksTodoExists(request, response, next) {
   }
 
   if(!userExists || !isUserTodo) {
-    return response.status(400).json({ error:  'ocorreu um erro'})
+    return response.status(404).json({ error:  'ocorreu um erro'})
   }
 
-  if(usersExists && isUuid && isUserTodo) {
+  if(userExists && isUuid && isUserTodo) {
     request.todo = todo;
     request.user = user;
     return next();
@@ -67,7 +67,18 @@ function checksTodoExists(request, response, next) {
 }
 
 function findUserById(request, response, next) {
-  // Complete aqui
+  const { id } = request.params;
+
+  const user = users.filter((user) => user.id === id)[0];
+
+  if(user === undefined || !user) {
+    return response.status(404).json({error: 'ocorreu um erro'});
+  }
+
+  if(user) {
+    request.user = user;
+    return next();
+  }
 }
 
 app.post('/users', (request, response) => {
