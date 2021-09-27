@@ -12,7 +12,7 @@ const users = [];
 function checksExistsUserAccount(request, response, next) {
   const { username } = request.headers;
 
-  const userExists = users.some((user) => username === username);
+  const userExists = users.some((user) => user.name === username);
 
   if(!userExists) {
     return response.status(400).json({erro: 'User does not exist'});
@@ -23,11 +23,47 @@ function checksExistsUserAccount(request, response, next) {
 }
 
 function checksCreateTodosUserAvailability(request, response, next) {
-  // Complete aqui
+  const { user } = request;
+
+  if((!user.pro && user.todos.length < 10) || user.pro) {
+    return next()
+  }
+
+  if(!user.pro && user.todos.lenght === 10) {
+    return response.status(400).json({ error: 'ocorreu um erro'});
+  }
 }
 
 function checksTodoExists(request, response, next) {
-  // Complete aqui
+  const { username } = request.headers;
+  const { id } = request.params;
+
+  const user = filter((todos) => todo.id === id)[0];
+  const todo = user?.todos.filter((todo) => todo.id === id)[0];
+
+  const userExists = users.some((user) => user.username === username);
+  const isUuid = validate(id);
+  const isUserTodo = user?.todos.some((todo) => todo.id === id);
+
+  console.log(user);
+  console.log(todo);
+  console.log(userExists);
+  console.log(isUuid);
+  console.log(isUserTodo);
+
+  if(!isUuid) {
+    return response.status(400).json({ error: 'this id is not a valid UUID'});
+  }
+
+  if(!userExists || !isUserTodo) {
+    return response.status(400).json({ error:  'ocorreu um erro'})
+  }
+
+  if(usersExists && isUuid && isUserTodo) {
+    request.todo = todo;
+    request.user = user;
+    return next();
+  }
 }
 
 function findUserById(request, response, next) {
